@@ -13,7 +13,127 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-const GLfloat PI = 3.14159265358979323846f;
+struct TVertex {
+    // position
+    glm::vec3 Position;
+    // normal
+    glm::vec3 Normal;
+    glm::vec2 TexCoord;
+};
+
+const int sectorCount = 36;
+const float pierRadius = 0.3f;
+const float pierHeight = 0.5f;
+// 圆周顶点
+std::vector<TVertex> getUnitCircleVertices()
+{
+    const float PI = 3.1415926f;
+    float sectorStep = 2 * PI / sectorCount;
+    float sectorAngle = 0.0f;
+
+    glm::vec3 position;
+    glm::vec3 normal;
+    TVertex tVertex;
+
+    std::vector<TVertex> unitCircleVertices;
+    for (int i = 0; i <= sectorCount; ++i)
+    {
+        sectorAngle = i * sectorStep;
+        position.x = pierRadius * cos(sectorAngle);
+        position.y = 0.0f;
+        position.z = pierRadius * sin(sectorAngle);
+
+        normal.x = cos(sectorAngle);
+        normal.y = 0.0f;
+        normal.z = sin(sectorAngle);
+
+        tVertex.Position = position;
+        tVertex.Normal = normal;
+
+        unitCircleVertices.push_back(tVertex);
+    }
+
+    return unitCircleVertices;
+}
+
+// generate vertices for a cylinder
+void buildCylinderVertices(std::vector<TVertex>& vertices)
+{
+    std::vector<TVertex> unitVertices = getUnitCircleVertices();
+
+    // 获取上、下圆周点数组
+    std::vector<TVertex> vctTop;
+    std::vector<TVertex> vctBot;
+
+    TVertex tVertex;
+    for (int i = 0; i < unitVertices.size(); ++i)
+    {
+        tVertex.Position = unitVertices[i].Position;
+        tVertex.Position.y = pierHeight;
+        tVertex.Normal = unitVertices[i].Normal;
+        tVertex.TexCoord[1] = 1.0f;
+        tVertex.TexCoord[0] = 0.3f;
+        vctTop.push_back(tVertex);
+
+        tVertex.Position.y = 0.0f;
+        tVertex.TexCoord[1] = 0.0f;
+        tVertex.TexCoord[0] = 0.7f;
+        vctBot.push_back(tVertex);
+        
+    }
+
+    assert(vctTop.size() >= 2);
+    assert(vctBot.size() >= 2);
+
+    // 圆柱侧面
+    for (int i = 0; i < vctTop.size() - 1; ++i)
+    {
+        // 左三角形
+        vertices.push_back(vctTop[i]);
+        vertices.push_back(vctBot[i]);
+        vertices.push_back(vctBot[i + 1]);
+
+        // 右三角形
+        vertices.push_back(vctTop[i]);
+        vertices.push_back(vctTop[i + 1]);
+        vertices.push_back(vctBot[i + 1]);
+    }
+
+    // 顶部圆形
+    glm::vec3 position;
+    for (int i = 0; i < vctTop.size() - 1; ++i)
+    {
+        glm::vec3 position(0.0f, pierHeight, 0.0f);
+        glm::vec3 normal(0.0f, 1.0f, 0.0f);
+        tVertex.Position = position;
+        tVertex.Normal = normal;
+        vertices.push_back(tVertex);
+
+        tVertex.Position = vctTop[i].Position;
+        vertices.push_back(tVertex);
+
+        tVertex.Position = vctTop[i + 1].Position;
+        vertices.push_back(tVertex);
+    }
+
+    // 底部圆形
+    for (int i = 0; i < vctBot.size() - 1; ++i)
+    {
+        glm::vec3 position(0.0f, 0.0f, 0.0f);
+        glm::vec3 normal(0.0f, -1.0f, 0.0f);
+        tVertex.Position = position;
+        tVertex.Normal = normal;
+        vertices.push_back(tVertex);
+
+        tVertex.Position = vctBot[i].Position;
+        vertices.push_back(tVertex);
+
+        tVertex.Position = vctBot[i + 1].Position;
+        vertices.push_back(tVertex);
+    }
+}
+
+const float PI = 3.14159265358979323846f;
 //将球横纵划分成50*50的网格
 const int Y_SEGMENTS = 50;
 const int X_SEGMENTS = 50;
@@ -90,7 +210,7 @@ int main()
     customShader lightCubeShader("D:/repo/glExperiment/glExperiment4/Shader/light_cube.vs", "D:/repo/glExperiment/glExperiment4/Shader/light_cube.fs");
 
     float vertices[] = {
-        // positions          // normals           // texture coords
+        // 位置               // 法向量             // 纹理坐标
         -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
          0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
          0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
@@ -133,20 +253,28 @@ int main()
         -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
         -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
     };
-    // positions all containers
+    // 各个箱子和球体的位置
+    // 不包含旋转角度
     glm::vec3 cubePositions[] = {
         glm::vec3(0.0f,  0.0f,  0.0f),
         glm::vec3(2.0f,  5.0f, -15.0f),
         glm::vec3(-1.5f, -2.2f, -2.5f),
         glm::vec3(-3.8f, -2.0f, -12.3f),
         glm::vec3(2.4f, -0.4f, -3.5f),
+
         glm::vec3(-1.7f,  3.0f, -7.5f),
         glm::vec3(1.3f, -2.0f, -2.5f),
         glm::vec3(1.5f,  2.0f, -2.5f),
         glm::vec3(1.5f,  0.2f, -1.5f),
-        glm::vec3(-1.3f,  1.0f, -1.5f)
+        glm::vec3(-1.3f,  1.0f, -1.5f),
+
+        glm::vec3(3.2f, 4.4f, -1.1f),
+        glm::vec3(2.1f, -3.1f, 6.6f),
+        glm::vec3(5.1f, -1.3f, 2.3f),
+        glm::vec3(2.3f, 2.2f, 3.1f),
+        glm::vec3(3.4f, 4.2f, -2.3f),
     };
-    // first, configure the cube's VAO (and VBO)
+    // 为箱子配置 VAO VBO
     unsigned int VBO[2], cubeVAO;
     glGenVertexArrays(1, &cubeVAO);
     glGenBuffers(2, VBO);
@@ -171,8 +299,7 @@ int main()
     std::vector<float> sphereVertices;
     std::vector<int> sphereIndices;
 
-    /*2-计算球体顶点*/
-    //生成球的顶点
+    // 球顶点
     for (int y = 0; y <= Y_SEGMENTS; y++)
     {
         for (int x = 0; x <= X_SEGMENTS; x++)
@@ -193,7 +320,7 @@ int main()
         }
     }
 
-    //生成球的Indices
+    // 生成球的Indices
     for (int i = 0; i < Y_SEGMENTS; i++)
     {
         for (int j = 0; j < X_SEGMENTS; j++)
@@ -210,11 +337,10 @@ int main()
     glBindBuffer(GL_ARRAY_BUFFER, VBO[1]);
     glBufferData(GL_ARRAY_BUFFER, sphereVertices.size() * sizeof(float), &sphereVertices[0], GL_STATIC_DRAW);
 
-    GLuint element_buffer_object;//EBO
+    unsigned int element_buffer_object;//EBO
     glGenBuffers(1, &element_buffer_object);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, element_buffer_object);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sphereIndices.size() * sizeof(int), &sphereIndices[0], GL_STATIC_DRAW);
-
 
     //设置顶点属性指针
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
@@ -224,18 +350,17 @@ int main()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
+    unsigned int VBO1, VAO1;
+    glGenVertexArrays(1, &VAO1);
+    glGenBuffers(1, &VBO1);
 
-    unsigned int VBO1[3], VAO1[3];
-    glGenVertexArrays(3, VAO1);
-    glGenBuffers(3, VBO1);
+    glBindVertexArray(VAO1);
 
-    glBindVertexArray(VAO1[0]);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO1[0]);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO1);
     //将顶点数据绑定至当前默认的缓冲中
     glBufferData(GL_ARRAY_BUFFER, sphereVertices.size() * sizeof(float), &sphereVertices[0], GL_STATIC_DRAW);
 
-    GLuint element_buffer_object_obj;//EBO
+    unsigned int element_buffer_object_obj;//EBO
     glGenBuffers(1, &element_buffer_object_obj);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, element_buffer_object_obj);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sphereIndices.size() * sizeof(int), &sphereIndices[0], GL_STATIC_DRAW);
@@ -250,53 +375,64 @@ int main()
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
 
-    //解绑VAO1和VBO1
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
-    // load textures (we now use a utility function to keep the code more organized)
-    // -----------------------------------------------------------------------------
+    std::vector<TVertex> pierVertices;
+    buildCylinderVertices(pierVertices);
+
+    unsigned int pierVBO, pierVAO;
+    glGenVertexArrays(1, &pierVAO);
+    glGenBuffers(1, &pierVBO);
+
+    glBindVertexArray(pierVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, pierVBO);
+
+    glBufferData(GL_ARRAY_BUFFER, pierVertices.size() * sizeof(TVertex), &pierVertices[0], GL_STATIC_DRAW);
+
+    // 顶点属性
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(TVertex), (void*)0);
+    // 法向量属性
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(TVertex), (void*)offsetof(TVertex, Normal));
+
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(TVertex), (void*)offsetof(TVertex, TexCoord));
+
+    glBindVertexArray(0);
+
+
+    // 为了更好看，集成了 loadTexture 函数来完成自动读取纹理操作
     unsigned int diffuseMap;
     unsigned int specularMap;
     diffuseMap = loadTexture("D:/repo/glExperiment/glExperiment4/container2.png");
     specularMap = loadTexture("D:/repo/glExperiment/glExperiment4/container2_specular.png");
-    // shader configuration
-    // --------------------
+
+    // 修改着色器，实现金属反光
     lightingShader.use();
     lightingShader.setInt("material.diffuse", 0);
     lightingShader.setInt("material.specular", 1);
 
-
-    // render loop
-    // -----------
     while (!glfwWindowShouldClose(window))
     {
         glfwSetKeyCallback(window, key_callback);
 
-        // per-frame time logic
-        // --------------------
         float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-        // input
-        // -----
         processInput(window);
 
-        // render
-        // ------
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glm::vec3 lightPos(1.2f + translate1, 1.0f + translate2, 2.0f + translate3);
 
-
-        // be sure to activate shader when setting uniforms/drawing objects
-        lightingShader.use(); //x左右 y 上下 z前后
-        //lightingShader.setVec3("light.direction", direction1);
+        lightingShader.use();
         lightingShader.setVec3("light.position", lightPos);
         lightingShader.setVec3("viewPos", camera.Position);
 
-        // light properties
+        // 光的属性
         lightingShader.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
         lightingShader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
         lightingShader.setVec3("light.specular", 0.5f, 0.5f, 0.5f);
@@ -306,7 +442,7 @@ int main()
         lightingShader.setFloat("light.quadratic", 0.032f);
 
 
-        // material properties
+        // 材质属性
         lightingShader.setFloat("material.shininess", 32.0f);
 
         // view/projection transformations
@@ -326,11 +462,7 @@ int main()
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, specularMap);
 
-        // render the cube
-        // glBindVertexArray(cubeVAO);
-        // glDrawArrays(GL_TRIANGLES, 0, 36);*/
-
-        // render containers
+        // 画箱子
         glBindVertexArray(cubeVAO);
         for (unsigned int i = 0; i < 5; i++)
         {
@@ -343,7 +475,7 @@ int main()
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
-        glBindVertexArray(VAO1[0]);
+        glBindVertexArray(VAO1);
 
         for (unsigned int i = 5; i < 10; i++)
         {
@@ -356,7 +488,43 @@ int main()
             glDrawElements(GL_TRIANGLES, X_SEGMENTS * Y_SEGMENTS * 6, GL_UNSIGNED_INT, 0);
         }
 
+        // be sure to activate shader when setting uniforms/drawing objects
+        lightingShader.setVec3("light.position", lightPos);
+        lightingShader.setVec3("viewPos", camera.Position);
 
+        // 正交平行的视景体
+        float fRatio = (float)SCR_WIDTH / (float)SCR_HEIGHT;
+        float fHeight = 10.0f;
+        float fWidth = fHeight * fRatio;
+        //glm::mat4 projection = glm::ortho(-fWidth, fWidth, -fHeight, fHeight, -10.f, 100.f);
+        glm::mat4 projection2 = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f); // 透视投影		
+        lightingShader.setMat4("projection", projection2);
+
+        glm::mat4 viewOrigin = camera.GetViewMatrix();
+        lightingShader.setMat4("view", viewOrigin);
+
+        // 绘制圆柱体
+        for (unsigned int i = 10; i < 15; ++i)
+        {
+            glm::mat4 modelPier = glm::mat4(1.0f);
+            modelPier = glm::translate(modelPier, cubePositions[i]);
+            float angle = 20.0f * i;
+            modelPier = glm::rotate(modelPier, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+            lightingShader.setMat4("model", modelPier);
+            glBindVertexArray(pierVAO);
+            glDrawArrays(GL_TRIANGLES, 0, pierVertices.size());
+        }
+        /*
+        viewOrigin = glm::rotate(viewOrigin, glm::radians(30.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        viewOrigin = glm::rotate(viewOrigin, glm::radians(15.0f), glm::vec3(0.0f, 0.0f, -1.0f));
+        lightingShader.setMat4("view", viewOrigin);
+        glm::mat4 modelPier = glm::mat4(1.0f);
+        lightingShader.setMat4("model", modelPier);
+        lightingShader.setVec3("objectColor", glm::vec3(0.5f, 0.1f, 0.3f));
+
+        glBindVertexArray(pierVAO);
+        glDrawArrays(GL_TRIANGLES, 0, pierVertices.size());
+        */
 
         //glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
@@ -369,42 +537,21 @@ int main()
         model = glm::scale(model, glm::vec3(0.2f)); // a smaller cube
         lightCubeShader.setMat4("model", model);
 
-
-
-        //glm::mat4 trans_mov = glm::mat4(1.0f);
-       // //trans_mov = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
-        //trans_mov = glm::translate(trans_mov, glm::vec3(translate1, translate2, translate3));
         glBindVertexArray(lightCubeVAO);
-        //unsigned int transformLoc_mov = glGetUniformLocation(lightCubeShader.ID, "transform_mov");
-        //glUniformMatrix4fv(transformLoc_mov, 1, GL_FALSE, glm::value_ptr(trans_mov));
-
         glDrawElements(GL_TRIANGLES, X_SEGMENTS * Y_SEGMENTS * 6, GL_UNSIGNED_INT, 0);
 
-
-
-
-        // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
-        // -------------------------------------------------------------------------------
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
-
-    // optional: de-allocate all resources once they've outlived their purpose:
-    // ------------------------------------------------------------------------
     glDeleteVertexArrays(1, &cubeVAO);
     glDeleteVertexArrays(1, &lightCubeVAO);
-    //glDeleteBuffers(1, VBO);
+    glDeleteVertexArrays(1, &pierVAO);
+    glDeleteBuffers(1, &pierVBO);
 
-    // glfw: terminate, clearing all previously allocated GLFW resources.
-    // ------------------------------------------------------------------
     glfwTerminate();
     return 0;
 }
 
-
-
-// process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
-// ---------------------------------------------------------------------------------------------------------
 void processInput(GLFWwindow* window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -421,8 +568,6 @@ void processInput(GLFWwindow* window)
 
 }
 
-// glfw: whenever the window size changed (by OS or user resize) this callback function executes
-// ---------------------------------------------------------------------------------------------
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     // make sure the viewport matches the new window dimensions; note that width and 
@@ -430,9 +575,6 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     glViewport(0, 0, width, height);
 }
 
-
-// glfw: whenever the mouse moves, this callback is called
-// -------------------------------------------------------
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 {
     float xpos = static_cast<float>(xposIn);
@@ -453,15 +595,11 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
     camera.ProcessMouseMovement(xoffset, yoffset);
 }
 
-// glfw: whenever the mouse scroll wheel scrolls, this callback is called
-// ----------------------------------------------------------------------
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
     camera.ProcessMouseScroll(static_cast<float>(yoffset));
 }
 
-// utility function for loading a 2D texture from file
-// ---------------------------------------------------
 unsigned int loadTexture(char const* path)
 {
     unsigned int textureID;
@@ -493,7 +631,7 @@ unsigned int loadTexture(char const* path)
     }
     else
     {
-        std::cout << "Texture failed to load at path: " << path << std::endl;
+        std::cout << "纹理读取失败！失败路径：" << path << std::endl;
         stbi_image_free(data);
     }
 

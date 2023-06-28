@@ -23,10 +23,10 @@
     <ClCompile Include="customShader.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\glad\src\glad.c">
+    <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="..\Dependencies\src\glad.c">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
