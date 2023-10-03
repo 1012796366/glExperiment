@@ -13,13 +13,13 @@
 - 方法之一：下载 Visual Studio 2022 并附带下载 v143 平台工具集，你只需要在安装 Visual Studio 2022 的时候勾选上“**使用 C++ 的桌面开发**”和“**通用 Windows 平台开发**”即可。
 ![](introPic/5.png)
 - 方法之二：降级项目的平台工具集。在 Visual Studio 中打开项目，然后右键点击解决方案。
-![](introPic/1.png)
+<br>![](introPic/1.png)
 <br>在接下来的菜单中找到属性，点击之。
-![](introPic/2.png)
+<br>![](introPic/2.png)
 <br>然后在上方的配置中选择“**所有配置**”并在平台中选择“**活动(x64)**”。
-![](introPic/3.png)
+<br>![](introPic/3.png)
 <br>接着将平台工具集更换为你现在的版本。
-![](introPic/4.png)
+<br>![](introPic/4.png)
 <br>对其他项目同样执行一样的操作，务必记得点击“**确定**”或者“**应用**”来保存你的设定。
 <br>完成，应当可以正常编译运行了。
 # 仍有问题？
