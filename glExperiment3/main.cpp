@@ -43,7 +43,7 @@ int main()
 		return -1;
 	}
 
-	customShader ourShader("D:/repo/glExperiment/glExperiment3/Shader/shader.vs", "D:/repo/glExperiment/glExperiment3/Shader/shader.fs");
+	customShader ourShader("Shader/shader.vs", "Shader/shader.fs");
 
 	float verticles[] = {
 		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
@@ -131,7 +131,7 @@ int main()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	// 加载和生成纹理
 	int width, height, nrChannels;
-	unsigned char* data = stbi_load("D:/repo/glExperiment/glExperiment3/container.jpg", &width, &height, &nrChannels, 0);
+	unsigned char* data = stbi_load("container.jpg", &width, &height, &nrChannels, 0);
 	if (data)
 	{
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
@@ -154,7 +154,7 @@ int main()
 	// 颠倒图像
 	// stbi_set_flip_vertically_on_load(true);
 	// 加载和生成纹理
-	data = stbi_load("D:/repo/glExperiment/glExperiment3/awesomeface.png", &width, &height, &nrChannels, 0);
+	data = stbi_load("awesomeface.png", &width, &height, &nrChannels, 0);
 	if (data)
 	{
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);

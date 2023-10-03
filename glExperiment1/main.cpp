@@ -50,7 +50,7 @@ int main()
 		return -1;
 	}
 
-	customShader ourShader("D:/repo/glExperiment/glExperiment1/Shader/shader.vs", "D:/repo/glExperiment/glExperiment1/Shader/shader.fs");
+	customShader ourShader("Shader/shader.vs", "Shader/shader.fs");
 
 	// 坐标
 	// 颜色

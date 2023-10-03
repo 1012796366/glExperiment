@@ -206,8 +206,8 @@ int main()
 
     glEnable(GL_DEPTH_TEST);
 
-    customShader lightingShader("D:/repo/glExperiment/glExperiment4/Shader/lighting_map.vs", "D:/repo/glExperiment/glExperiment4/Shader/lighting_map.fs");
-    customShader lightCubeShader("D:/repo/glExperiment/glExperiment4/Shader/light_cube.vs", "D:/repo/glExperiment/glExperiment4/Shader/light_cube.fs");
+    customShader lightingShader("Shader/lighting_map.vs", "Shader/lighting_map.fs");
+    customShader lightCubeShader("Shader/light_cube.vs", "Shader/light_cube.fs");
 
     float vertices[] = {
         // 位置               // 法向量             // 纹理坐标
@@ -406,8 +406,8 @@ int main()
     // 为了更好看，集成了 loadTexture 函数来完成自动读取纹理操作
     unsigned int diffuseMap;
     unsigned int specularMap;
-    diffuseMap = loadTexture("D:/repo/glExperiment/glExperiment4/container2.png");
-    specularMap = loadTexture("D:/repo/glExperiment/glExperiment4/container2_specular.png");
+    diffuseMap = loadTexture("container2.png");
+    specularMap = loadTexture("container2_specular.png");
 
     // 修改着色器，实现金属反光
     lightingShader.use();

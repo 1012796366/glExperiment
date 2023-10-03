@@ -58,8 +58,8 @@ int main()
 		return -1;
 	}
 
-	customShader fixStar("D:/repo/glExperiment/glExperiment2/Shader/shader.vs", "D:/repo/glExperiment/glExperiment2/Shader/shader.fs");
-	customShader movStar("D:/repo/glExperiment/glExperiment2/Shader/shader.vs", "D:/repo/glExperiment/glExperiment2/Shader/shader.fs");
+	customShader fixStar("Shader/shader.vs", "Shader/shader.fs");
+	customShader movStar("Shader/shader.vs", "Shader/shader.fs");
 
 	// ×ø±ê
 	// ÑÕÉ«
