@@ -145,7 +145,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\glad\src\glad.c" />
+    <ClCompile Include="..\Dependencies\src\glad.c" />
     <ClCompile Include="customShader.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
