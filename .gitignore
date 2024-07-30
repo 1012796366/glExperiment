@@ -361,3 +361,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/glExperiment5/glExperiment5.vcxproj
+/glExperiment5/glExperiment5.vcxproj.filters
+/glExperiment5
